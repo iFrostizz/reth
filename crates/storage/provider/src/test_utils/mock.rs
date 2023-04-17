@@ -229,6 +229,7 @@ impl BlockIdProvider for MockEthProvider {
             .map(|(hash, header)| ChainInfo {
                 best_hash: *hash,
                 best_number: header.number,
+                beneficiary: header.beneficiary,
                 last_finalized: None,
                 safe_finalized: None,
             })

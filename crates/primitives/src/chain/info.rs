@@ -1,4 +1,4 @@
-use crate::{BlockNumber, BlockNumberOrTag, H256};
+use crate::{BlockNumber, BlockNumberOrTag, H160, H256};
 
 /// Current status of the blockchain's head.
 #[derive(Default, Debug, Eq, PartialEq)]
@@ -11,6 +11,8 @@ pub struct ChainInfo {
     pub last_finalized: Option<BlockNumber>,
     /// Safe block
     pub safe_finalized: Option<BlockNumber>,
+    /// Recipient of transaction fees
+    pub beneficiary: H160,
 }
 
 impl ChainInfo {

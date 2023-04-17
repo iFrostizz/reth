@@ -118,7 +118,20 @@ impl<DB: Database> BlockIdProvider for ShareableDatabase<DB> {
             .map_err(Into::<reth_interfaces::db::Error>::into)?
             .unwrap_or_default();
         let best_hash = self.block_hash(best_number)?.unwrap_or_default();
-        Ok(ChainInfo { best_hash, best_number, last_finalized: None, safe_finalized: None })
+        let beneficiary = self
+            .block_by_number(best_number)
+            .unwrap_or_default()
+            .unwrap_or_default()
+            .header
+            .beneficiary;
+
+        Ok(ChainInfo {
+            best_hash,
+            best_number,
+            last_finalized: None,
+            safe_finalized: None,
+            beneficiary,
+        })
     }
 
     fn block_number(&self, hash: H256) -> Result<Option<BlockNumber>> {
@@ -144,7 +157,7 @@ impl<DB: Database> BlockProvider for ShareableDatabase<DB> {
                     body: transactions,
                     ommers: ommers.unwrap_or_default(),
                     withdrawals,
-                }))
+                }));
             }
         }
 
@@ -156,7 +169,7 @@ impl<DB: Database> BlockProvider for ShareableDatabase<DB> {
             let tx = self.db.tx()?;
             // TODO: this can be optimized to return empty Vec post-merge
             let ommers = tx.get::<tables::BlockOmmers>(number)?.map(|o| o.ommers);
-            return Ok(ommers)
+            return Ok(ommers);
         }
 
         Ok(None)
@@ -216,7 +229,7 @@ impl<DB: Database> TransactionsProvider for ShareableDatabase<DB> {
                                         block_number,
                                     };
 
-                                    return Ok(Some((transaction, meta)))
+                                    return Ok(Some((transaction, meta)));
                                 }
                             }
                         }
@@ -251,7 +264,7 @@ impl<DB: Database> TransactionsProvider for ShareableDatabase<DB> {
                         .map(|result| result.map(|(_, tx)| tx))
                         .collect::<std::result::Result<Vec<_>, _>>()?;
                     Ok(Some(transactions))
-                }
+                };
             }
         }
         Ok(None)
@@ -314,7 +327,7 @@ impl<DB: Database> ReceiptProvider for ShareableDatabase<DB> {
                         .map(|result| result.map(|(_, tx)| tx))
                         .collect::<std::result::Result<Vec<_>, _>>()?;
                     Ok(Some(transactions))
-                }
+                };
             }
         }
         Ok(None)
@@ -332,7 +345,7 @@ impl<DB: Database> WithdrawalsProvider for ShareableDatabase<DB> {
                         .view(|tx| tx.get::<tables::BlockWithdrawals>(number))??
                         .map(|w| w.withdrawals)
                         .unwrap_or_default(),
-                ))
+                ));
             }
         }
         Ok(None)

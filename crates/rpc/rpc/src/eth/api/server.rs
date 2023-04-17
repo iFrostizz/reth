@@ -50,7 +50,8 @@ where
 
     /// Handler for: `eth_coinbase`
     async fn author(&self) -> Result<Address> {
-        Err(internal_rpc_err("unimplemented"))
+        trace!(target: "rpc::eth", "Serving eth_coinbase");
+        Ok(EthApiSpec::chain_info(self).with_message("failed to read chain info")?.beneficiary)
     }
 
     /// Handler for: `eth_accounts`
@@ -273,13 +274,13 @@ where
         let block_count = block_count.as_u64();
 
         if block_count == 0 {
-            return Ok(FeeHistory::default())
+            return Ok(FeeHistory::default());
         }
 
         let Some(end_block) = self.inner.client.block_number_for_id(newest_block).to_rpc_result()? else { return Err(EthApiError::UnknownBlockNumber.into())};
 
         if end_block < block_count {
-            return Err(EthApiError::InvalidBlockRange.into())
+            return Err(EthApiError::InvalidBlockRange.into());
         }
 
         let start_block = end_block - block_count;
@@ -316,7 +317,7 @@ where
 
             // We should receive exactly the amount of blocks missing from the cache
             if headers.len() != (end_block - start_block + 1) as usize {
-                return Err(EthApiError::InvalidBlockRange.into())
+                return Err(EthApiError::InvalidBlockRange.into());
             }
 
             for header in headers {

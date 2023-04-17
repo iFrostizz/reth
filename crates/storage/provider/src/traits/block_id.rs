@@ -30,7 +30,7 @@ pub trait BlockIdProvider: BlockHashProvider + Send + Sync {
             BlockId::Hash(hash) => Ok(Some(hash.into())),
             BlockId::Number(num) => {
                 if matches!(num, BlockNumberOrTag::Latest) {
-                    return Ok(Some(self.chain_info()?.best_hash))
+                    return Ok(Some(self.chain_info()?.best_hash));
                 }
                 self.convert_block_number(num)?
                     .map(|num| self.block_hash(num))
